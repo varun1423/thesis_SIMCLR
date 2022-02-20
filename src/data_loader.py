@@ -106,9 +106,6 @@ class ThermalBarrierCoating(Dataset):
         x1 = self.augment(x)
         x2 = self.augment(x)
 
-        #x1 = self.preprocess(x1)
-        #x2 = self.preprocess(x2)
-
         return x1, x2
 
     def __len__(self):
