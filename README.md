@@ -3,5 +3,5 @@ base code for my thesis.
 
 # references
 [01] (https://github.com/Spijkervet/SimCLR)
-[02] (https://arxiv.org/abs/2002.05709)
+[02] [SimCLR paper] (https://arxiv.org/abs/2002.05709)
 
