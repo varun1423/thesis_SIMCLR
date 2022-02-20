@@ -2,6 +2,6 @@
 base code for my thesis. 
 
 # references
-[01] (https://github.com/Spijkervet/SimCLR)
+[01] (https://github.com/Spijkervet/SimCLR) (Enter)
 [02] [SimCLR paper] (https://arxiv.org/abs/2002.05709)
 
