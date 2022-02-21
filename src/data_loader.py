@@ -53,13 +53,14 @@ class GaussianBlur:
 
 def tbc_transforms(horizontal_flip_prob=0.5,
                    gaussian_prob=0.5,
+                   rotation_prob = 0.5,
                    crop_s=224,
                    ):
     transform = transforms.Compose(
         [transforms.Grayscale(num_output_channels=3),
          transforms.RandomResizedCrop(crop_s),
          transforms.RandomApply([GaussianBlur()], p=gaussian_prob),
-         transforms.RandomRotation(30),
+         transforms.RandomApply([transforms.RandomRotation(30)], p=rotation_prob),
          transforms.RandomHorizontalFlip(p=horizontal_flip_prob),
          transforms.ToTensor(),
          ]
