@@ -65,24 +65,29 @@ class ProjectionHead(nn.Module):
 
 
 class PreModel(nn.Module):
-    def __init__(self, base_model):
+    def __init__(self, base_model, conv_1_channel, p_in_features, p_hidden_features, p_out_features,p_head_type):
         super().__init__()
         self.base_model = base_model
+        self.p_in_features = p_in_features
+        self.p_out_features = p_out_features
+        self.p_hidden_features = p_hidden_features
+        self.p_head_type = p_head_type
+        self.conv_1_channel = conv_1_channel
 
         if base_model == 'ResNet18':
             self.encoder = models.resnet18(pretrained=False)
         elif base_model == 'ResNet50':
             self.encoder = models.resnet50(pretrained=False)
 
-        self.encoder.conv1 = nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1),padding=2, bias=False)
+        self.encoder.conv1 = nn.Conv2d(conv_1_channel, 64, kernel_size=(3, 3), stride=(1, 1),padding=2, bias=False)
         self.encoder.maxpool = Identity()
-        # replace last layer
+        # replace last fc layer
         self.encoder.fc = Identity()
 
         for p in self.encoder.parameters():
             p.requires_grad = True
 
-        self.projector = ProjectionHead(512, 2048, 128)
+        self.projector = ProjectionHead(self.p_in_features, self.p_hidden_features, self.p_out_features, self.p_head_type)
 
     def forward(self, x):
         out = self.encoder(x)

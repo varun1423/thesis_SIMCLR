@@ -50,42 +50,30 @@ class GaussianBlur:
         x = x.filter(ImageFilter.GaussianBlur(radius=sigma))
         return x
 
-def tbc_transforms(color_jitter_prob = 0.8,
-        gray_scale_prob = 0.2,
-        horizontal_flip_prob = 0.5,
-        gaussian_prob: float = 0.5,
-        solarization_prob: float = 0.0,
-        min_scale = 0.08,
-        max_scale = 1.0,
-        crop_size = 128,
-    ):
-        transform = transforms.Compose(
-                [transforms.RandomResizedCrop(
-                    crop_size,
-                    scale=(min_scale, max_scale),
-                    interpolation=transforms.InterpolationMode.BICUBIC,
-                ),
-                    transforms.RandomApply(
-                        [transforms.ColorJitter(brightness=0.1, contrast=0.1)],
-                        p=color_jitter_prob,
-                    ),
-                    transforms.RandomGrayscale(p=gray_scale_prob),
-                    transforms.RandomApply([GaussianBlur()], p=gaussian_prob),
-                    transforms.RandomApply([Solarization()], p=solarization_prob),
-                    transforms.RandomHorizontalFlip(p=horizontal_flip_prob),
-                    transforms.ToTensor(),
-                    transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.228, 0.224, 0.225)),
-                ]
-            )
-        return transform
+
+def tbc_transforms(horizontal_flip_prob=0.5,
+                   gaussian_prob=0.5,
+                   crop_s=224,
+                   ):
+    transform = transforms.Compose(
+        [transforms.Grayscale(num_output_channels=3),
+         transforms.RandomResizedCrop(crop_s),
+         transforms.RandomApply([GaussianBlur()], p=gaussian_prob),
+         transforms.RandomRotation(30),
+         transforms.RandomHorizontalFlip(p=horizontal_flip_prob),
+         transforms.ToTensor(),
+         ]
+    )
+    return transform
 
 
 class ThermalBarrierCoating(Dataset):
-    def __init__(self,phase, train_dir, csv_file, data_dir):
+    def __init__(self,phase, train_dir, csv_file, data_dir, crop_size):
         self.train_dir = train_dir
         self.csv_file = csv_file
         self.phase = phase
         self.data_dir = data_dir
+        self.crop_size = crop_size
         if self.phase == 'train':
             self.data_csv = pd.read_csv(self.train_dir / Path(self.csv_file))
         else:
@@ -94,7 +82,7 @@ class ThermalBarrierCoating(Dataset):
         self.phase = phase
         self.label = self.data_csv['encoding']
         self.image_ID = self.data_csv['Image_Name']
-        self.transforms = tbc_transforms()
+        self.transforms = tbc_transforms(crop_s = crop_size)
 
     def __getitem__(self, idx):
 

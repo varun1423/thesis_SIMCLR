@@ -158,7 +158,7 @@ class LARS(Optimizer):
                     return False
         return True
 
-def load_optimizer(arg_optimizer, model, batch_size, epochs):
+def load_optimizer(arg_optimizer, model, batch_size, epochs, weight_decay):
 
     scheduler = None
     if arg_optimizer == "Adam":
@@ -170,7 +170,7 @@ def load_optimizer(arg_optimizer, model, batch_size, epochs):
         optimizer = LARS(
             [params for params in model.parameters() if params.requires_grad],
             lr=0.1,
-            weight_decay=1e-6,
+            weight_decay=weight_decay,
             exclude_from_weight_decay=["batch_normalization", "bias"],
         )
 
