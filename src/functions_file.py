@@ -1,6 +1,7 @@
 import torch
 import os
 
+import wandb
 
 
 def train(train_loader, model, criterion, optimizer, nr, device):
@@ -22,7 +23,7 @@ def train(train_loader, model, criterion, optimizer, nr, device):
 
         if nr == 0 and step % 50 == 0:
             print(f"Step [{step}/{len(train_loader)}]\t Loss: {round(loss.item(), 5)}")
-
+        wandb.log({"train_step_loss": loss.item(),})
         loss_epoch += loss.item()
     return loss_epoch
 
@@ -46,8 +47,9 @@ def valid(valid_loader, model, criterion, nr, device):
         loss_epoch += loss.item()
     return loss_epoch
 
-def save_model(model, optimizer, scheduler, current_epoch, name):
-    out = os.path.join('./',name.format(current_epoch))
+def save_model(model, optimizer, scheduler, current_epoch, name, run_name):
+    out = f"{name}_{current_epoch}_{run_name}_.pt"
+    #out = os.path.join('./',name.format(current_epoch))
 
     torch.save({'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
