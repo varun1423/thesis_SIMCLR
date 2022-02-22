@@ -158,18 +158,18 @@ class LARS(Optimizer):
                     return False
         return True
 
-def load_optimizer(arg_optimizer, model, batch_size, epochs, weight_decay):
+def load_optimizer(arg_optimizer, model, batch_size, epochs, weight_decay, sgd_adam_lr):
 
     scheduler = None
     if arg_optimizer == "Adam":
-        optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)  # TODO: LARS
+        optimizer = torch.optim.Adam(model.parameters(), lr=sgd_adam_lr)  # TODO: LARS
     elif arg_optimizer == "LARS":
         # optimized using LARS with linear learning rate scaling
         # (i.e. LearningRate = 0.3 × BatchSize/256) and weight decay of 10−6.
         learning_rate = 0.3 * batch_size / 256
         optimizer = LARS(
             [params for params in model.parameters() if params.requires_grad],
-            lr=0.1,
+            lr=learning_rate,
             weight_decay=weight_decay,
             exclude_from_weight_decay=["batch_normalization", "bias"],
         )
@@ -179,7 +179,7 @@ def load_optimizer(arg_optimizer, model, batch_size, epochs, weight_decay):
             optimizer, epochs, eta_min=0, last_epoch=-1
         )
     elif arg_optimizer == "SGD":
-        optimizer = torch.optim.SGD(model.parameters(), lr=3e-4)
+        optimizer = torch.optim.SGD(model.parameters(), lr=sgd_adam_lr)
     else:
         raise NotImplementedError
 

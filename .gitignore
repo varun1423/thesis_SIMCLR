@@ -1,3 +1,9 @@
 /wandb/
-/src/__pycache__/
-/src/__pycache__/
+src/__pycache__/
+/ckpt_all/
+/ckpt/
+downstream_src/__pycache__/
+src/__pycache__/data_loader.cpython-37.pyc
+src/__pycache__/functions_file.cpython-37.pyc
+src/__pycache__/lars_optim.cpython-37.pyc
+src/__pycache__/model.cpython-37.pyc
