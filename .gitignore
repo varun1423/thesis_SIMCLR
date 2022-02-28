@@ -7,3 +7,5 @@ src/__pycache__/data_loader.cpython-37.pyc
 src/__pycache__/functions_file.cpython-37.pyc
 src/__pycache__/lars_optim.cpython-37.pyc
 src/__pycache__/model.cpython-37.pyc
+/hdf5/tbc_train_data_hdf5.h5
+/hdf5/tbc_validation_data_hdf5.h5

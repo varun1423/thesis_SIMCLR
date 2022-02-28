@@ -4,7 +4,8 @@ from IPython.display import clear_output, Image, SVG
 from typing import Any, Callable, List, Optional, Sequence, Type, Union
 from PIL import Image, ImageFilter, ImageOps
 from pathlib import Path
-
+import h5py as h5
+import numpy as np
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
@@ -52,7 +53,7 @@ class GaussianBlur:
 
 
 def tbc_transforms(crop_s,
-                   channel,
+                   channel=3,
                    horizontal_flip_prob=0.5,
                    gaussian_prob=0.5,
                    rotation_prob=0.5
@@ -60,7 +61,7 @@ def tbc_transforms(crop_s,
     if channel == 1:
         transform = transforms.Compose(
             [transforms.Grayscale(num_output_channels=1),
-             transforms.RandomResizedCrop(crop_s),
+             transforms.RandomResizedCrop(size=(crop_s,crop_s)),
              transforms.RandomApply([GaussianBlur()], p=gaussian_prob),
              transforms.RandomApply([transforms.RandomRotation(30)], p=rotation_prob),
              transforms.RandomHorizontalFlip(p=horizontal_flip_prob),
@@ -70,7 +71,7 @@ def tbc_transforms(crop_s,
     else:
         transform = transforms.Compose(
             [transforms.Grayscale(num_output_channels=3),
-             transforms.RandomResizedCrop(crop_s),
+             transforms.RandomResizedCrop(size=(crop_s,crop_s)),
              transforms.RandomApply([GaussianBlur()], p=gaussian_prob),
              transforms.RandomApply([transforms.RandomRotation(30)], p=rotation_prob),
              transforms.RandomHorizontalFlip(p=horizontal_flip_prob),
@@ -107,7 +108,6 @@ class ThermalBarrierCoating(Dataset):
 
         x1 = self.augment(x)
         x2 = self.augment(x)
-
         return x1, x2
 
     def __len__(self):
@@ -121,4 +121,36 @@ class ThermalBarrierCoating(Dataset):
         else:
             return img
 
+        return img
+
+
+class TBC_H5(Dataset):
+    def __init__(self, hdf5_file, crop_size, channel, phase="train"):
+        self.phase = phase
+        self.hdf5_file = hdf5_file
+        self.crop_size = crop_size
+        self.channel = channel
+        self.transforms = tbc_transforms(crop_s=self.crop_size, channel=self.channel)
+        with h5.File(hdf5_file, "r") as f:
+            self.length = len(f['labels'])
+
+    def __len__(self):
+        return self.length
+
+    def __getitem__(self, idx):
+        with h5.File(self.hdf5_file, "r") as fin:
+            label = fin['labels'][:].astype(np.int64)
+            data = fin['data'][:]
+
+        x = Image.fromarray(data[idx], mode="L")
+        x1 = self.augment(x)
+        x2 = self.augment(x)
+        return x1, x2
+
+    def augment(self, img):
+
+        if self.phase == 'train':
+            img = self.transforms(img)
+        else:
+            return img
         return img

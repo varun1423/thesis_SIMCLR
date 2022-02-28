@@ -1,6 +1,7 @@
 """
                              train_dir="D:/TUD/TU_Dresden/WiSe_2021/Thesis_FZJ/tbc_with_lifetime/",
 """
+import os
 import torch
 from src import model
 from src import lars_optim
@@ -8,6 +9,8 @@ from src import data_loader
 from torch.utils.data import DataLoader
 from src import functions_file
 import wandb
+os.environ["WANDB_SILENT"] = "true"
+
 
 torch.manual_seed(14)
 
@@ -71,6 +74,7 @@ simCLR_encoder.to(device)
 
 
 # data_loader train
+"""
 data_loader_tbc = data_loader.ThermalBarrierCoating(phase='train',train_dir=config.train_dir,
                                                     csv_file=config.csv_file,
                                                     data_dir=config.data_dir,
@@ -81,6 +85,18 @@ train_set = DataLoader(data_loader_tbc,
                        batch_size=config.batch_size,
                        shuffle=True,
                        drop_last=True)
+"""
+
+data_loader_tbc = data_loader.TBC_H5(phase='train',
+                                     hdf5_file= "D:/TUD/TU_Dresden/WiSe_2021/SimCLR/tbc_hdf5.h5" ,
+                                     crop_size=config.crop_size,
+                                     channel=config.conv_1_channel)
+
+train_set = DataLoader(data_loader_tbc,
+                       batch_size=config.batch_size,
+                       shuffle=True,
+                       drop_last=True)
+
 
 
 # optimizer
@@ -113,9 +129,8 @@ run_name =  wandb.run.id
 
 # training loop
 for epoch in range(config.epochs):
-    break
     print(f"Epoch [{epoch}/{config.epochs}]\t", flush=True)
-    stime = time.time()
+    #stime = time.time()
     simCLR_encoder.train()
 
     if config.nr == 0 and epoch < 10:
