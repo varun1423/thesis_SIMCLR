@@ -133,16 +133,13 @@ class TBC_H5(Dataset):
         self.transforms = tbc_transforms(crop_s=self.crop_size, channel=self.channel)
         with h5.File(hdf5_file, "r") as f:
             self.length = len(f['labels'])
+            self.data = f['data'][:]
 
     def __len__(self):
         return self.length
 
     def __getitem__(self, idx):
-        with h5.File(self.hdf5_file, "r") as fin:
-            label = fin['labels'][:].astype(np.int64)
-            data = fin['data'][:]
-
-        x = Image.fromarray(data[idx], mode="L")
+        x = Image.fromarray(self.data[idx], mode="L")
         x1 = self.augment(x)
         x2 = self.augment(x)
         return x1, x2
