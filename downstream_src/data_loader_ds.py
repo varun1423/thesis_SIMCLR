@@ -48,6 +48,7 @@ def tbc_transforms(crop_s,
                  transforms.RandomResizedCrop(crop_s),
                  transforms.RandomHorizontalFlip(p=horizontal_flip_prob),
                  transforms.ToTensor(),
+                 transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.228, 0.224, 0.225)),
                  ]
             )
         else:
@@ -56,6 +57,7 @@ def tbc_transforms(crop_s,
                  transforms.RandomResizedCrop(crop_s),
                  transforms.RandomHorizontalFlip(p=horizontal_flip_prob),
                  transforms.ToTensor(),
+                 transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.228, 0.224, 0.225)),
                  ]
             )
     else:
@@ -64,6 +66,7 @@ def tbc_transforms(crop_s,
                 [transforms.Grayscale(num_output_channels=1),
                  transforms.RandomResizedCrop(crop_s),
                  transforms.ToTensor(),
+                 transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.228, 0.224, 0.225)),
                  ]
             )
         else:
@@ -71,9 +74,11 @@ def tbc_transforms(crop_s,
                 [transforms.Grayscale(num_output_channels=3),
                  transforms.RandomResizedCrop(crop_s),
                  transforms.ToTensor(),
+                 transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.228, 0.224, 0.225)),
                  ]
             )
     return transform
+
 
 class ThermalBarrierCoating(Dataset):
     def __init__(self, phase, train_dir, csv_file, data_dir, crop_size, channel):
@@ -96,7 +101,7 @@ class ThermalBarrierCoating(Dataset):
 
         x = self.transforms(x)
 
-        return x,y
+        return x, y
 
     def __len__(self):
         return self.data_csv['encoding'].shape[0]

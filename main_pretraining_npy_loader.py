@@ -1,12 +1,11 @@
 """
                              train_dir="D:/TUD/TU_Dresden/WiSe_2021/Thesis_FZJ/tbc_with_lifetime/",
-                            ------cropping strategy-----------------------------------------
-                             baseline
-                             cropping strategy option:
-                             crops_non_overlap_only
+            ------cropping strategy-----------------------------------------
+                    cropping strategy option:
+                             crops_no_overlap_only
                              crops_overlap_only
                              crops_overlap_and_non_overlap
-                             ----------------------------------------------------------------
+            ----------------------------------------------------------------
 """
 import torch
 from src import model
@@ -18,8 +17,8 @@ import wandb
 
 torch.manual_seed(14)
 
-default_hyperparameter = dict(batch_size=350,
-                              epochs=350,
+default_hyperparameter = dict(batch_size=300,
+                              epochs=10000,
                               base_encoder="ResNet18",
                               weight_decay=1e-6,
                               lr=0.5,
@@ -31,13 +30,13 @@ default_hyperparameter = dict(batch_size=350,
                               p_head_type="nonlinear",
                               crop_size=224,
                               conv_1_channel=3,
-                              transform="imagenet",
+                              transform=3,
                               nr=0,
                               train_dir="/p/project/hai_consultantfzj/set_up/solo-learn_SSL/dataset_crop_imgs/",
-                              csv_file="orignal_img_train_2times.csv",
+                              npy_file="orig_images_200_iter.npy",
                               data_dir="train_orignal_data",
-                              cropping_strategy = "baseline",
-                              comment="data_2times_lar:0.3")
+                              cropping_strategy="crops_overlap_and_non_overlap",
+                              comment="batch 300, using 2 times data in npy cosine step size 1000")
 
 # init_wandb
 wandb.init(project="simCLR_scratch",
@@ -60,6 +59,7 @@ simCLR_encoder = model.PreModel(config.base_encoder,
                                 config.p_out_features,
                                 config.p_head_type)
 
+print(f"gpus count {torch.cuda.device_count()  }")
 if torch.cuda.device_count() > 1:
     print(f"Let's use {torch.cuda.device_count()} GPUs! :)",  flush=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -80,12 +80,12 @@ simCLR_encoder.to(device)
 
 
 # data_loader train
-data_loader_tbc = data_loader.ThermalBarrierCoating(phase='train',train_dir=config.train_dir,
-                                                    csv_file=config.csv_file,
-                                                    data_dir=config.data_dir,
-                                                    crop_size=config.crop_size,
-                                                    channel=config.transform,
-                                                    cropping_strategy=config.cropping_strategy)
+data_loader_tbc = data_loader.NPY_loader(train_dir=config.train_dir,
+                                         npy_file=config.npy_file,
+                                         crop_size=config.crop_size,
+                                         channel=config.conv_1_channel,
+                                         cropping_strategy=config.cropping_strategy
+                                        )
 
 train_set = DataLoader(data_loader_tbc,
                        batch_size=config.batch_size,
@@ -106,7 +106,7 @@ optimizer, _ = lars_optim.load_optimizer(config.arg_optimizer,
 warmupscheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lambda epoch : (epoch+1)/10.0)
 
 mainscheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer,
-                                                                     500,
+                                                                     1000,
                                                                      eta_min=0.05,
                                                                      last_epoch=-1,
                                                                      verbose=True)
@@ -142,7 +142,6 @@ for epoch in range(config.epochs):
                                          optimizer,
                                          config.nr,
                                          device)
-
     if config.nr == 0 and (epoch + 1) % 20 == 0:
         functions_file.save_model(simCLR_encoder,
                                   optimizer,
