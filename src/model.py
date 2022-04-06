@@ -52,12 +52,12 @@ class ProjectionHead(nn.Module):
         self.head_type = head_type
 
         if self.head_type == 'linear':
-            self.layers = LinearLayer(self.in_features, self.out_features, False, True)
+            self.layers = LinearLayer(self.in_features, self.out_features, True, False)
         elif self.head_type == 'nonlinear':
             self.layers = nn.Sequential(
-                LinearLayer(self.in_features, self.hidden_features, False, False),
+                LinearLayer(self.in_features, self.hidden_features, True, False),
                 nn.ReLU(),
-                LinearLayer(self.hidden_features, self.out_features, False, False))
+                LinearLayer(self.hidden_features, self.out_features, True, False))
 
     def forward(self, x):
         x = self.layers(x)

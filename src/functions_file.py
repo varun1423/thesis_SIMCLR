@@ -8,10 +8,9 @@ def train(train_loader, model, criterion, optimizer, nr, device):
     loss_epoch = 0
 
     for step, (x_i, x_j) in enumerate(train_loader):
-        print(x_i.size())
         optimizer.zero_grad()
-        x_i = x_i.squeeze().to(device).float()
-        x_j = x_j.squeeze().to(device).float()
+        x_i = x_i.squeeze().float()
+        x_j = x_j.squeeze().float()
 
         # positive pair, with encoding
         z_i = model(x_i)
@@ -29,12 +28,12 @@ def train(train_loader, model, criterion, optimizer, nr, device):
     return loss_epoch
 
 
-def valid(valid_loader, model, criterion, nr, device):
+def valid(valid_loader, model, criterion, nr):
     loss_epoch = 0
     for step, (x_i, x_j) in enumerate(valid_loader):
 
-        x_i = x_i.squeeze().to(device).float()
-        x_j = x_j.squeeze().to(device).float()
+        x_i = x_i.squeeze().float()
+        x_j = x_j.squeeze().float()
 
         # positive pair, with encoding
         z_i = model(x_i)
@@ -51,10 +50,14 @@ def valid(valid_loader, model, criterion, nr, device):
 def save_model(model, optimizer, scheduler, current_epoch, name, run_name):
     out = f"{name}_ckpt_{current_epoch}_{run_name}_.pt"
     #out = os.path.join('./',name.format(current_epoch))
+    if scheduler == None:
 
-    torch.save({'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                'scheduler_state_dict':scheduler.state_dict()}, out)
+        torch.save({'model_state_dict': model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict()}, out)
+    else:
+        torch.save({'model_state_dict': model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'scheduler_state_dict':scheduler.state_dict()}, out)
 
 
 def down_stream_optimizer(downstream_model, arg_optimizer, sgd_adam_lr):
@@ -122,7 +125,7 @@ def validation_ds(model, data_loader, criterion,device):
 
 def ckpt_folder(ckpt_all,wandb_id):
     if not os.path.exists(f"./{ckpt_all}"):
-        os.makedirs("ckpt_all")
+        os.makedirs(ckpt_all)
 
     ckpt_folder = f'./ckpt_all/ckpt__{wandb_id}/'
     if not os.path.exists(ckpt_folder):

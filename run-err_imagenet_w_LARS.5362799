@@ -1,0 +1,54 @@
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "Python/3.8.5", "GCC/9.3.0"
+   Try: "module spider Python/3.8.5 GCC/9.3.0" to see how to load the
+module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "PyTorch/1.7.0-Python-3.8.5"
+   Try: "module spider PyTorch/1.7.0-Python-3.8.5" to see how to load the
+module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "scikit"
+   Try: "module spider scikit" to see how to load the module(s).
+
+
+
+Global seed set to 123
+Global seed set to 123
+wandb: W&B syncing is set to `offline` in this directory.  Run `wandb online` or set WANDB_MODE=online to enable cloud syncing.
+GPU available: True, used: True
+GPU available: True, used: True
+TPU available: False, using: 0 TPU cores
+TPU available: False, using: 0 TPU cores
+Global seed set to 123
+Global seed set to 123
+initializing ddp: GLOBAL_RANK: 0, MEMBER: 1/8
+initializing ddp: GLOBAL_RANK: 0, MEMBER: 1/8
+Traceback (most recent call last):
+  File "/p/project/hai_consultantfzj/set_up/simclr_with_down_stream/pytorch_lightning/pl_main_pretraining.py", line 96, in <module>
+    trainer.fit(
+  File "/p/home/jusers/shitole1/shared/varun_SSL/pytorchlightning_environment/venv/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 460, in fit
+    self._run(model)
+  File "/p/home/jusers/shitole1/shared/varun_SSL/pytorchlightning_environment/venv/lib/python3.8/site-packages/pytorch_lightning/trainer/trainer.py", line 714, in _run
+    self.accelerator.setup_environment()
+  File "/p/home/jusers/shitole1/shared/varun_SSL/pytorchlightning_environment/venv/lib/python3.8/site-packages/pytorch_lightning/accelerators/accelerator.py", line 80, in setup_environment
+    self.training_type_plugin.setup_environment()
+  File "/p/home/jusers/shitole1/shared/varun_SSL/pytorchlightning_environment/venv/lib/python3.8/site-packages/pytorch_lightning/plugins/training_type/ddp.py", line 118, in setup_environment
+    self.setup_distributed()
+  File "/p/home/jusers/shitole1/shared/varun_SSL/pytorchlightning_environment/venv/lib/python3.8/site-packages/pytorch_lightning/plugins/training_type/ddp.py", line 206, in setup_distributed
+    self.init_ddp_connection()
+  File "/p/home/jusers/shitole1/shared/varun_SSL/pytorchlightning_environment/venv/lib/python3.8/site-packages/pytorch_lightning/plugins/training_type/ddp.py", line 273, in init_ddp_connection
+    torch_distrib.init_process_group(self.torch_distributed_backend, rank=global_rank, world_size=world_size)
+  File "/p/home/jusers/shitole1/juwels/.local/lib/python3.9/site-packages/torch/distributed/distributed_c10d.py", line 547, in init_process_group
+    _store_based_barrier(rank, store, timeout)
+  File "/p/home/jusers/shitole1/juwels/.local/lib/python3.9/site-packages/torch/distributed/distributed_c10d.py", line 219, in _store_based_barrier
+    raise RuntimeError(
+RuntimeError: Timed out initializing process group in store based barrier on rank: 0, for key: store_based_barrier_key:1 (world_size=8, worker_count=1, timeout=0:30:00)
+wandb: Waiting for W&B process to finish, PID 15937
+wandb: Program failed with code 1. 
+error: *** job 5362799 CANCELLED DUE TO TIME LIMIT ***

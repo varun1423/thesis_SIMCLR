@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torchvision import datasets, transforms
 from src import lars_optim
 import pytorch_lightning as pl
-
+import wandb
 
 class LightingModel(pl.LightningModule):
 
@@ -25,6 +25,7 @@ class LightingModel(pl.LightningModule):
         # self() calls self.forward()
         loss = self.loss_func(self(x), self(y))
         self.log("train_loss", loss, on_step=True, on_epoch=True)
+        #wandb.log({"nce_loss" : loss})
         return loss
 
     def configure_optimizers(self):

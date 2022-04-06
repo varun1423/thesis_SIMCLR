@@ -4,12 +4,12 @@ from IPython.display import clear_output, Image, SVG
 from typing import Any, Callable, List, Optional, Sequence, Type, Union
 from PIL import Image, ImageFilter, ImageOps
 from pathlib import Path
-import h5py as h5
-import numpy as np
+
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
-
+import h5py as h5
+import numpy as np
 
 class Solarization:
     """Solarization as a callable object."""
@@ -53,31 +53,60 @@ class GaussianBlur:
 
 
 def tbc_transforms(crop_s,
-                   channel=3,
+                   channel,
                    horizontal_flip_prob=0.5,
                    gaussian_prob=0.5,
-                   rotation_prob=0.5
+                   rotation_prob=0.5,
+                   solarization_prob=0.5,
+                   color_jitter_prob=0.5,
+                   brightness=0.8,
+                   contrast=0.8,
+                   saturation=0.8,
+                   hue=0.2,
+                   min_scale=0.08,
+                   max_scale=1.0,
                    ):
     if channel == 1:
         transform = transforms.Compose(
             [transforms.Grayscale(num_output_channels=1),
-             transforms.RandomResizedCrop(size=(crop_s,crop_s)),
+             transforms.RandomResizedCrop(crop_s),
              transforms.RandomApply([GaussianBlur()], p=gaussian_prob),
              transforms.RandomApply([transforms.RandomRotation(30)], p=rotation_prob),
              transforms.RandomHorizontalFlip(p=horizontal_flip_prob),
              transforms.ToTensor(),
+             transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.228, 0.224, 0.225)),
+             ]
+        )
+    elif channel == 3 :
+        transform = transforms.Compose(
+            [transforms.Grayscale(num_output_channels=3),
+             transforms.RandomResizedCrop(crop_s),
+             transforms.RandomApply([GaussianBlur()], p=gaussian_prob),
+             transforms.RandomApply([transforms.RandomRotation(30)], p=rotation_prob),
+             transforms.RandomHorizontalFlip(p=horizontal_flip_prob),
+             transforms.ToTensor(),
+             transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.228, 0.224, 0.225)),
              ]
         )
     else:
         transform = transforms.Compose(
-            [transforms.Grayscale(num_output_channels=3),
-             transforms.RandomResizedCrop(size=(crop_s,crop_s)),
-             transforms.RandomApply([GaussianBlur()], p=gaussian_prob),
-             transforms.RandomApply([transforms.RandomRotation(30)], p=rotation_prob),
-             transforms.RandomHorizontalFlip(p=horizontal_flip_prob),
-             transforms.ToTensor(),
-             ]
-        )
+                [transforms.Grayscale(num_output_channels=3),
+                 transforms.RandomResizedCrop(
+                    crop_s,
+                    scale=(min_scale, max_scale),
+                    interpolation=transforms.InterpolationMode.BICUBIC,
+                ),
+                    transforms.RandomApply(
+                    [transforms.ColorJitter(brightness, contrast, saturation, hue)],
+                    p=color_jitter_prob,
+                    ),
+                    transforms.RandomApply([GaussianBlur()], p=gaussian_prob),
+                    transforms.RandomApply([Solarization()], p=solarization_prob),
+                    transforms.RandomHorizontalFlip(p=horizontal_flip_prob),
+                    transforms.ToTensor(),
+                    transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.228, 0.224, 0.225)),
+                ]
+            )
     return transform
 
 
@@ -108,6 +137,7 @@ class ThermalBarrierCoating(Dataset):
 
         x1 = self.augment(x)
         x2 = self.augment(x)
+
         return x1, x2
 
     def __len__(self):
@@ -130,7 +160,8 @@ class TBC_H5(Dataset):
         self.hdf5_file = hdf5_file
         self.crop_size = crop_size
         self.channel = channel
-        self.transforms = tbc_transforms(crop_s=self.crop_size, channel=self.channel)
+        self.transforms = tbc_transforms(crop_s=self.crop_size,
+                                         channel=self.channel)
         with h5.File(hdf5_file, "r") as f:
             self.length = len(f['labels'])
             self.data = f['data'][:]
@@ -143,6 +174,7 @@ class TBC_H5(Dataset):
         x1 = self.augment(x)
         x2 = self.augment(x)
         return x1, x2
+
 
     def augment(self, img):
 
