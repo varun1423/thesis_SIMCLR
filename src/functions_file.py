@@ -8,6 +8,7 @@ def train(train_loader, model, criterion, optimizer, nr, device):
     loss_epoch = 0
 
     for step, (x_i, x_j) in enumerate(train_loader):
+        print(x_i.size())
         optimizer.zero_grad()
         x_i = x_i.squeeze().to(device).float()
         x_j = x_j.squeeze().to(device).float()

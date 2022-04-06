@@ -15,7 +15,7 @@ os.environ["WANDB_SILENT"] = "true"
 torch.manual_seed(14)
 
 default_hyperparameter = dict(batch_size=4,
-                              epochs=300,
+                              epochs=30,
                               base_encoder="ResNet18",
                               weight_decay=1e-6, lr=0.2,
                               Lars_optimizer=True,
