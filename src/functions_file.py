@@ -215,7 +215,7 @@ def positive_pair(image, crop_size, overlap, resolution_x, resolution_y):
     x = random.randint(0, end_limit_x)
     y = random.randint(0, end_limit_y)
 
-    # checking if Image cropped randomly sampled points lies on the Image and resamples if otherwise 
+    #checking if Image cropped randomly sampled points lies on the Image and resamples if otherwise 
     if (x + crop_size > 2048) or (y + crop_size > 2048):
         resample = True
     else:
@@ -253,22 +253,30 @@ def positive_pair(image, crop_size, overlap, resolution_x, resolution_y):
 
         if (x-(2*crop_size) > 0) and (y-(2*crop_size)>0): # nrth west
             non_overlapping_crop_start_list.append((x-(2*crop_size), y-(2*crop_size)))
+            non_overlapping_crop_start_list.append((random.randint(x-(2*crop_size),x), y-(2*crop_size)))
+            non_overlapping_crop_start_list.append((x-(2*crop_size),random.randint(y-(2*crop_size),y)))
+
         if ((x+crop_size)+(2*crop_size) < resolution_x) and (y-(2*crop_size) > 0): # north east
             non_overlapping_crop_start_list.append((x+(2*crop_size), y-(2*crop_size)))
-        if ((x+crop_size)+(2*crop_size) < resolution_x) and ((y+crop_size)+(2*crop_size) < resolution_y): # south east
-            non_overlapping_crop_start_list.append((x+(2*crop_size), y+(2*crop_size)))
+            non_overlapping_crop_start_list.append((random.randint(x,x+(2*crop_size)), y-(2*crop_size)))
+            non_overlapping_crop_start_list.append((x+(2*crop_size),random.randint(y-(2*crop_size),y)))
+
         if (x-(2*crop_size) > 0) and ((y+crop_size)+(2*crop_size) < resolution_y): # south west
             non_overlapping_crop_start_list.append((x-(2*crop_size), y+(2*crop_size)))
+            non_overlapping_crop_start_list.append((x-(2*crop_size), random.randint(y,y+(2*crop_size))))
+            non_overlapping_crop_start_list.append((random.randint(x-(2*crop_size),x),y))
+
+        if ((x+crop_size)+(2*crop_size) < resolution_x) and ((y+crop_size)+(2*crop_size) < resolution_y): # south east
+            non_overlapping_crop_start_list.append((x+(2*crop_size), y+(2*crop_size)))
+            non_overlapping_crop_start_list.append((random.randint(x,x+(2*crop_size)),y+(2*crop_size)))
+            non_overlapping_crop_start_list.append((x+(2*crop_size),random.randint(y, y+(2*crop_size))))
 
         if len(non_overlapping_crop_start_list)>0:
             co_ordinates = random.choice(non_overlapping_crop_start_list)
             second_non_overlap = ((co_ordinates[0], co_ordinates[1], co_ordinates[0] + crop_size, co_ordinates[1] + crop_size))
-            second_image_non_overlap = inp_img.crop(second_non_overlap)
-        else:
-            main_Crop_image, second_image_non_overlap = random_crop_2048(image, 256, False)
+            second_non_overlap = inp_img.crop(second_non_overlap)
 
-        return main_Crop_image, second_image_non_overlap
-
+        return main_Crop_image, second_non_overlap
 
 def positive_pair_50_overlap(image, crop_size, resolution_x, resolution_y):
     """created a positive pair with 50% overlap.
